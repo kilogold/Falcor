@@ -27,12 +27,9 @@
 ***************************************************************************/
 #pragma once
 #include <string>
-#include "Externals/RapidJson/include/rapidjson/document.h"
 #include "Graphics/Material/Material.h"
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
 #include "Scene.h"
+#include "Utils/JsonDocument.h"
 
 namespace Falcor
 {
@@ -42,42 +39,42 @@ namespace Falcor
         static bool loadScene(Scene& scene, const std::string& filename, Model::LoadFlags modelLoadFlags, Scene::LoadFlags sceneLoadFlags);
 
     private:
-
+        using JsonVal = JsonDocument::Value;
         SceneImporter(Scene& scene) : mScene(scene) {}
         bool load(const std::string& filename, Model::LoadFlags modelLoadFlags, Scene::LoadFlags sceneLoadFlags);
 
-        bool parseVersion(const rapidjson::Value& jsonVal);
-        bool parseModels(const rapidjson::Value& jsonVal);
-        bool parseLights(const rapidjson::Value& jsonVal);
-        bool parseLightProbes(const rapidjson::Value& jsonVal);
-        bool parseCameras(const rapidjson::Value& jsonVal);
-        bool parseAmbientIntensity(const rapidjson::Value& jsonVal);
-        bool parseActiveCamera(const rapidjson::Value& jsonVal);
-        bool parseCameraSpeed(const rapidjson::Value& jsonVal);
-        bool parseLightingScale(const rapidjson::Value& jsonVal);
-        bool parsePaths(const rapidjson::Value& jsonVal);
-        bool parseUserDefinedSection(const rapidjson::Value& jsonVal);
-        bool parseActivePath(const rapidjson::Value& jsonVal);
-        bool parseIncludes(const rapidjson::Value& jsonVal);
+        bool parseVersion(const JsonVal& jsonVal);
+        bool parseModels(const JsonVal& jsonVal);
+        bool parseLights(const JsonVal& jsonVal);
+        bool parseLightProbes(const JsonVal& jsonVal);
+        bool parseCameras(const JsonVal& jsonVal);
+        bool parseAmbientIntensity(const JsonVal& jsonVal);
+        bool parseActiveCamera(const JsonVal& jsonVal);
+        bool parseCameraSpeed(const JsonVal& jsonVal);
+        bool parseLightingScale(const JsonVal& jsonVal);
+        bool parsePaths(const JsonVal& jsonVal);
+        bool parseUserDefinedSection(const JsonVal& jsonVal);
+        bool parseActivePath(const JsonVal& jsonVal);
+        bool parseIncludes(const JsonVal& jsonVal);
 
         bool topLevelLoop();
 
         bool loadIncludeFile(const std::string& Include);
 
-        bool createModel(const rapidjson::Value& jsonModel);
-        bool createModelInstances(const rapidjson::Value& jsonVal, const Model::SharedPtr& pModel);
-        bool createPointLight(const rapidjson::Value& jsonLight);
-        bool createDirLight(const rapidjson::Value& jsonLight);
-        ObjectPath::SharedPtr createPath(const rapidjson::Value& jsonPath);
-        bool createPathFrames(ObjectPath* pPath, const rapidjson::Value& jsonFramesArray);
-        bool createCamera(const rapidjson::Value& jsonCamera);
+        bool createModel(const JsonVal& jsonModel);
+        bool createModelInstances(const JsonVal& jsonVal, const Model::SharedPtr& pModel);
+        bool createPointLight(const JsonVal& jsonLight);
+        bool createDirLight(const JsonVal& jsonLight);
+        ObjectPath::SharedPtr createPath(const JsonVal& jsonPath);
+        bool createPathFrames(ObjectPath* pPath, const JsonVal& jsonFramesArray);
+        bool createCamera(const JsonVal& jsonCamera);
 
         bool error(const std::string& msg);
 
         template<uint32_t VecSize>
-        bool getFloatVec(const rapidjson::Value& jsonVal, const std::string& desc, float vec[VecSize]);
-        bool getFloatVecAnySize(const rapidjson::Value& jsonVal, const std::string& desc, std::vector<float>& vec);
-        rapidjson::Document mJDoc;
+        bool getFloatVec(const JsonVal& jsonVal, const std::string& desc, float vec[VecSize]);
+        bool getFloatVecAnySize(const JsonVal& jsonVal, const std::string& desc, std::vector<float>& vec);
+        JsonDocument::SharedPtr mpJDoc;
         Scene& mScene;
         std::string mFilename;
         std::string mDirectory;

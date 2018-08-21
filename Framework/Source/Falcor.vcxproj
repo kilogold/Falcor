@@ -520,6 +520,7 @@
     <ClCompile Include="Utils\DXHeader.cpp" />
     <ClCompile Include="Utils\Font.cpp" />
     <ClCompile Include="Utils\Gui.cpp" />
+    <ClCompile Include="Utils\JsonDocument.cpp" />
     <ClCompile Include="Utils\Logger.cpp" />
     <ClCompile Include="Utils\Math\ParallelReduction.cpp" />
     <ClCompile Include="Utils\MonitorInfo.cpp" />
@@ -1105,6 +1106,7 @@
     <ClInclude Include="Utils\FrameRate.h" />
     <ClInclude Include="Utils\Graph.h" />
     <ClInclude Include="Utils\Gui.h" />
+    <ClInclude Include="Utils\JsonDocument.h" />
     <ClInclude Include="Utils\Logger.h" />
     <ClInclude Include="Utils\Math\CubicSpline.h" />
     <ClInclude Include="Utils\Math\FalcorMath.h" />

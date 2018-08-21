@@ -30,7 +30,6 @@
 
 #include "Framework.h"
 #include "SceneImporter.h"
-#include "rapidjson/error/en.h"
 #include "Scene.h"
 #include "Utils/Platform/OS.h"
 #include <sstream>
@@ -57,7 +56,7 @@ namespace Falcor
     }
 
     template<uint32_t VecSize>
-    bool SceneImporter::getFloatVec(const rapidjson::Value& jsonVal, const std::string& desc, float vec[VecSize])
+    bool SceneImporter::getFloatVec(const JsonVal& jsonVal, const std::string& desc, float vec[VecSize])
     {
         if(jsonVal.IsArray() == false)
         {
@@ -82,7 +81,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::getFloatVecAnySize(const rapidjson::Value& jsonVal, const std::string& desc, std::vector<float>& vec)
+    bool SceneImporter::getFloatVecAnySize(const JsonVal& jsonVal, const std::string& desc, std::vector<float>& vec)
     {
         if (jsonVal.IsArray() == false)
         {
@@ -108,7 +107,7 @@ namespace Falcor
         return importer.load(filename, modelLoadFlags, sceneLoadFlags);
     }
 
-    bool SceneImporter::createModelInstances(const rapidjson::Value& jsonVal, const Model::SharedPtr& pModel)
+    bool SceneImporter::createModelInstances(const JsonVal& jsonVal, const Model::SharedPtr& pModel)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -178,7 +177,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::createModel(const rapidjson::Value& jsonModel)
+    bool SceneImporter::createModel(const JsonVal& jsonModel)
     {
         // Model must have at least a filename
         if(jsonModel.HasMember(SceneKeys::kFilename) == false)
@@ -292,7 +291,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseModels(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseModels(const JsonVal& jsonVal)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -310,7 +309,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::createDirLight(const rapidjson::Value& jsonLight)
+    bool SceneImporter::createDirLight(const JsonVal& jsonLight)
     {
         auto pDirLight = DirectionalLight::create();
 
@@ -362,7 +361,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::createPointLight(const rapidjson::Value& jsonLight)
+    bool SceneImporter::createPointLight(const JsonVal& jsonLight)
     {
         auto pPointLight = PointLight::create();
 
@@ -455,7 +454,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseLights(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseLights(const JsonVal& jsonVal)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -501,7 +500,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseLightProbes(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseLightProbes(const JsonVal& jsonVal)
     {
         if (jsonVal.IsArray() == false)
         {
@@ -587,7 +586,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::createPathFrames(ObjectPath* pPath, const rapidjson::Value& jsonFramesArray)
+    bool SceneImporter::createPathFrames(ObjectPath* pPath, const JsonVal& jsonFramesArray)
     {
         // an array of key frames
         if(jsonFramesArray.IsArray() == false)
@@ -637,7 +636,7 @@ namespace Falcor
         return true;
     }
 
-    ObjectPath::SharedPtr SceneImporter::createPath(const rapidjson::Value& jsonPath)
+    ObjectPath::SharedPtr SceneImporter::createPath(const JsonVal& jsonPath)
     {
         auto pPath = ObjectPath::create();
 
@@ -700,7 +699,7 @@ namespace Falcor
         return pPath;
     }
 
-    bool SceneImporter::parsePaths(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parsePaths(const JsonVal& jsonVal)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -722,7 +721,7 @@ namespace Falcor
         return true;
     }
         
-    bool SceneImporter::parseActivePath(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseActivePath(const JsonVal& jsonVal)
     {
         if (mScene.getVersion() != 1)
         {
@@ -750,7 +749,7 @@ namespace Falcor
         return error("Active path \"" + activePath + "\" not found." );
     }
 
-    bool SceneImporter::createCamera(const rapidjson::Value& jsonCamera)
+    bool SceneImporter::createCamera(const JsonVal& jsonCamera)
     {
         auto pCamera = Camera::create();
         std::string activePath;
@@ -862,7 +861,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseCameras(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseCameras(const JsonVal& jsonVal)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -898,25 +897,16 @@ namespace Falcor
 
         if(findFileInDataDirectories(filename, fullpath))
         {
-            // Load the file
-            std::ifstream fileStream(fullpath);
-            std::stringstream strStream;
-            strStream << fileStream.rdbuf();
-            std::string jsonData = strStream.str();
-            rapidjson::StringStream JStream(jsonData.c_str());
-
             // Get the file directory
             auto last = fullpath.find_last_of("/\\");
             mDirectory = fullpath.substr(0, last);
 
-            // create the DOM
-            mJDoc.ParseStream(JStream);
+            std::string log;
+            mpJDoc = JsonDocument::load(fullpath, log);
 
-            if(mJDoc.HasParseError())
+            if(mpJDoc == nullptr)
             {
-                size_t line;
-                line = std::count(jsonData.begin(), jsonData.begin() + mJDoc.GetErrorOffset(), '\n');
-                return error(std::string("JSON Parse error in line ") + std::to_string(line) + ". " + rapidjson::GetParseError_En(mJDoc.GetParseError()));
+                return error(log);
             }
 
             if(topLevelLoop() == false)
@@ -937,13 +927,13 @@ namespace Falcor
         }
     }
 
-    bool SceneImporter::parseAmbientIntensity(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseAmbientIntensity(const JsonVal& jsonVal)
     {
         logWarning("SceneImporter: Global ambient term is no longer supported. Ignoring value.");
         return true;
     }
 
-    bool SceneImporter::parseLightingScale(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseLightingScale(const JsonVal& jsonVal)
     {
         if(jsonVal.IsNumber() == false)
         {
@@ -955,7 +945,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseCameraSpeed(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseCameraSpeed(const JsonVal& jsonVal)
     {
         if(jsonVal.IsNumber() == false)
         {
@@ -967,7 +957,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseActiveCamera(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseActiveCamera(const JsonVal& jsonVal)
     {
         // Cameras should already be initialized at this stage
         if(jsonVal.IsString() == false)
@@ -990,7 +980,7 @@ namespace Falcor
         return error("Active camera \"" + activeCamera + "\" not found.");
     }
 
-    bool SceneImporter::parseVersion(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseVersion(const JsonVal& jsonVal)
     {
         if(jsonVal.IsUint() == false)
         {
@@ -1000,7 +990,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseUserDefinedSection(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseUserDefinedSection(const JsonVal& jsonVal)
     {
         if(jsonVal.IsObject() == false)
         {
@@ -1121,7 +1111,7 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::parseIncludes(const rapidjson::Value& jsonVal)
+    bool SceneImporter::parseIncludes(const JsonVal& jsonVal)
     {
         if(jsonVal.IsArray() == false)
         {
@@ -1199,7 +1189,7 @@ namespace Falcor
     bool SceneImporter::validateSceneFile()
     {
         // Make sure the top-level is valid
-        for(auto it = mJDoc.MemberBegin(); it != mJDoc.MemberEnd(); it++)
+        for(auto it = mpJDoc->memberBegin(); it != mpJDoc->memberEnd(); it++)
         {
             bool found = false;
             const std::string name(it->name.GetString());
@@ -1231,8 +1221,8 @@ namespace Falcor
 
         for(uint32_t i = 0; i < arraysize(kFunctionTable); i++)
         {
-            const auto& jsonMember = mJDoc.FindMember(kFunctionTable[i].token.c_str());
-            if(jsonMember != mJDoc.MemberEnd())
+            const auto& jsonMember = mpJDoc->findMember(kFunctionTable[i].token);
+            if(jsonMember != mpJDoc->memberEnd())
             {
                 auto a = kFunctionTable[i].func;
                 if((this->*a)(jsonMember->value) == false)

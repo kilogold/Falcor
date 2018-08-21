@@ -538,6 +538,9 @@
     <ClCompile Include="Utils\VariablesBufferUI.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\JsonDocument.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Model\Animation.h">
@@ -1697,6 +1700,9 @@
       <Filter>Effects\FXAA</Filter>
     </ClInclude>
     <ClInclude Include="Utils\VariablesBufferUI.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\JsonDocument.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

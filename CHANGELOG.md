@@ -1,7 +1,7 @@
 v3.0.8
 ------
 - Added support for StructuredBuffers with VariableBuffer::renderUI
-
+- Wrapped rapidjson inside a JsonDocument class
 
 v3.0.7
 ------
